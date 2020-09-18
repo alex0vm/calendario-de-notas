@@ -63,7 +63,7 @@
           locale="es"
           :short-weekdays="true"
         ></v-calendar>
-
+        <!-- Agregar evento -->
         <v-dialog v-model="dialog">
           <v-card>
             <v-container>
@@ -90,11 +90,12 @@
             min-width="350px"
             flat
           >
-            <!-- Agregar Funcionalidades Editar y Eliminar -->
+            
             <v-toolbar
               :color="selectedEvent.color"
               dark
             >
+            <!-- Eliminar nota -->
               <v-btn icon @click="deleteEvent(selectedEvent)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
@@ -103,7 +104,7 @@
             </v-toolbar>
 
 
-
+            <!--Editar nota-->
             <v-card-text>
               <v-form text v-if="currentlyEditing !== selectedEvent.id">
                 <h4>{{selectedEvent.name}} </h4> 
@@ -128,7 +129,7 @@
                 color="secondary"
                 @click="selectedOpen = false"
               >
-                Cancel
+                Cerrar
               </v-btn>
               <v-btn text v-if="currentlyEditing !== selectedEvent.id"
               @click.prevent="editEvent(selectedEvent.id)">Editar</v-btn>
@@ -154,9 +155,9 @@
       type: 'month',
       typeToLabel: {
         month: 'Mes',
-        week: 'Week',
-        day: 'Day',
-        '4day': '4 Days',
+        week: 'Semana',
+        day: 'Dia',
+        '4day': '4 dias',
       },
       start: null,
       end: null,
@@ -213,14 +214,15 @@
       this.getEvent();
     },
     methods: {
+      //Llamado a evento editar
       async updateEvent(ev){
         try {
           await db.collection('eventos').doc(ev.id).update({
             name: ev.name,
             details:ev.details
           })
-          this.selectedOpen = false;
-          this.currentlyEditing = null;
+          this.selectedOpen = false; //cerrar ventana
+          this.currentlyEditing = null; //restaurar datos de edicion
         } catch (error) {
           console.log(error)
         }
@@ -228,8 +230,8 @@
       editEvent(ev){
         this.currentlyEditing = ev;
       },
-
-      async deleteEvent(ev){ //parametro ev = SelectedEvent
+      //Llamado a evento borrar
+      async deleteEvent(ev){ 
         try {
           await db.collection('eventos').doc(ev.id).delete();
           this.selectedOpen=false; //cerrar ventana modal
@@ -239,7 +241,7 @@
           
         }
       },
-
+      //Agregar nueva nota
       async addEvent(){
         try {
           if(this.start && this.end && this.name){
@@ -252,7 +254,7 @@
               color:this.color,
               
             })
-            
+            //Llamado y restauraación de datos del evento
             this.getEvent();
             
             this.name=null;
@@ -268,13 +270,12 @@
         }
 
       },
-
+       
       async getEvent(){
         try {
           const snapshot = await db.collection('eventos').get();
           const events = [];
           snapshot.forEach(doc => {
-            //console.log(doc.id);
             let eventoData = doc.data();
             eventoData.id = doc.id;
             events.push(eventoData);
